@@ -1,14 +1,32 @@
 <template>
 	<v-container class="table-border">
-		
+
+
+		<div>
+			<v-card dark
+			align="center"
+			justify="center"
+			class="upperCard"
+			>
+
+				<p class="customSearch" @click="componentShowing = !componentShowing"> Click to expand custom search parameters  </p>
+
+					<div v-if="componentShowing"> The component goes here
+					</div>
+
+			</v-card>
+			</div>
+
 		<template>
 			<v-data-table
 			:headers="headers"
 			:items="coins"
 			:items-per-page="15"
+			search
 			sort-by="rvol"
 			sort-desc
 			dark
+			class="tableMain"
 			>
 
 			<template v-slot:item.rvol="{item}">
@@ -49,7 +67,7 @@ import axios from 'axios';
 				],
 				coins: [{
 				}],
-				isActive: false,
+				componentShowing: false, 
 		}
 	},
 
@@ -69,6 +87,8 @@ import axios from 'axios';
 				return 'green4';
 			}
 		}
+
+
   },
 
 created() {
@@ -239,6 +259,14 @@ axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
 <style scoped>
 
 
+.upperCard {
+	padding-bottom: 0px;
+}
+
+.customSearch {
+	font-size: 12px;
+}
+
 
 .table-border {
 	border-radius: 0.5em;
@@ -246,6 +274,10 @@ axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
 	color:  rgba(	255, 107, 142, 50);
 
 	box-shadow: 0 0 3em 0 currentColor;
+}
+
+.tableMain {
+	padding-top: 0px !important; 
 }
 
 .green1 {
