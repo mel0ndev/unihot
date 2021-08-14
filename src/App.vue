@@ -14,7 +14,6 @@
 		<span>
 			<h1 class="unihot"> Unihot </h1>
 		</span>
-		<br>
 			<span class="UnihotSubtitle"> <h4> The hottest coins on Uniswap </h4> </span>
 	
 	</div>
@@ -81,6 +80,7 @@ export default {
 	margin: 10px;
 	padding-left: 10px;
 	padding-top: 15px;
+	color: rgba(255, 255, 255, 0.5);
 }
 
 .table-wrapper {
