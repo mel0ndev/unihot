@@ -1,27 +1,12 @@
 <template>
 	<v-container class="table-border">
 
-
-		<div>
-			<v-card dark
-			align="center"
-			justify="center"
-			class="upperCard"
-			>
-
-				<p class="customSearch" @click="componentShowing = !componentShowing"> Click to expand custom search parameters  </p>
-
-					<div v-if="componentShowing"> The component goes here
-					</div>
-
-			</v-card>
-			</div>
-
 		<template>
 			<v-data-table
 			:headers="headers"
 			:items="coins"
 			:items-per-page="15"
+			:key="coins.rvol"
 			search
 			sort-by="rvol"
 			sort-desc
@@ -48,6 +33,7 @@
 
 <script>
 import axios from 'axios';
+import {eventBus} from "../main.js"; 
 
 
 	export default {
@@ -67,7 +53,9 @@ import axios from 'axios';
 				],
 				coins: [{
 				}],
-				componentShowing: false, 
+				denomination: '', 
+				lookBack: '', 
+				lookBackInput: 7,
 		}
 	},
 
@@ -93,7 +81,25 @@ import axios from 'axios';
 
 created() {
 
+eventBus.$on('changeDenom', (denominationEvent) => {
+	this.denomination = denominationEvent; 
+	//console.log(this.denomination);
+}), 
+
+eventBus.$on('changeLookBack', (lookBackEvent) => {
+	this.lookBack = lookBackEvent;
+	console.log(this.lookBack); 
+})
+
+
+
+// MOVE DATA TO METHOD, CALL METHOD ON CREATED, THEN CAN REUSE CODE ON EVENT SUBMIT 
+eventBus.$on('lookBackInput', (lookBackInputEvent) => {
+	this.lookBackInput = lookBackInputEvent;
+	console.log(this.lookBackInput); 
+})
  
+
 
 //get current date from uniswap, couldn't find a better way, sorry for load times
 axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3', 
@@ -118,7 +124,7 @@ axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
 	{
 			query: `
 	{
-			tokenDayDatas(first: 100, orderBy: date, orderDirection:desc, 
+			tokenDayDatas(first: 250, orderBy: date, orderDirection:desc, 
 				where:{ volumeUSD_gt: 250000, 
 				date_gte: ${date}}) {
 				volumeUSD
@@ -150,6 +156,8 @@ axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
 				var tokenID_2 = tokenIdArray[j];
 				
 
+
+				//day data for tokens
 				const main = async () => {
 					const result = await axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
 					{
@@ -158,7 +166,7 @@ axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
 								token(id: "${tokenID_2}") {
 									name
 									symbol
-									tokenDayData(first: 7, orderBy: date, orderDirection:desc) {
+									tokenDayData(first: ${this.lookBackInput}, orderBy: date, orderDirection:desc) {
 										date
 										volumeUSD
 										volume
@@ -169,9 +177,9 @@ axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
 
 						`
 					});
+
+
 					//data for front end
-
-
 					const coinSymbol = result.data.data.token.symbol;
 					const coinName = result.data.data.token.name;
 					const coinData = result.data.data.token.tokenDayData;
@@ -187,18 +195,13 @@ axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
 					}
 					
 
-					//coin data for display 		
-
-					
-
-
-
+					//coin data for display 						
 					//this.coins.currentPrice = coinData[0].priceUSD; 
 					const coinCurrentPrice = "$" + Number(coinData[0].priceUSD).toLocaleString();
 
 
 					//this.coins.volume = coinData[0].volume;
-					const coinTokenVolume = Number(coinData[0].volume).toFixed(3) + " " +coinSymbol; 
+					const coinTokenVolume = Number(coinData[0].volume).toFixed(3) + " " + coinSymbol; 
 
 
 				//this.coins.volumeUSD = coinData[0].volumeUSD; 
@@ -226,19 +229,13 @@ axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
 
 				}
 
-
+				//add if statement to determine whether day or hourly data gets loaded
 				main();
 
 			}
 
-
-	});
+		});
 		
-
-
-			//we now have token ids to pass to whatever I need to pass it to
-			//now need a new query and loop through for each coin in balls array 
-   
    });
 
 	console.log(this.coins.splice(0, 1));
@@ -273,7 +270,7 @@ axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
 	padding: 0px;
 	color:  rgba(	255, 107, 142, 50);
 
-	box-shadow: 0 0 3em 0 currentColor;
+	box-shadow: 0 0 2.5em 0 currentColor;
 }
 
 .tableMain {
